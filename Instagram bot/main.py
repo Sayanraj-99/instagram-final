@@ -1,6 +1,6 @@
 import database
 from scheduler import AutoScheduler
-
+from bot import app
 # Initialize database
 database.init_db()
 
@@ -9,5 +9,4 @@ scheduler = AutoScheduler()
 scheduler.start()
 
 # Start bot
-from bot import app
 app.run_polling()
