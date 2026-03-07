@@ -1,2 +1,2 @@
-python-telegram-bot
 instagrapi
+python-telegram-bot
