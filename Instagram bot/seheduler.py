@@ -40,6 +40,11 @@ class AutoScheduler:
             video = c.fetchone()
 
             if video:
+                c.execute(
+    "UPDATE queue SET status='processing' WHERE id=?",
+    (video[0],)
+)
+conn.commit()
 
                 # Get account
                 c.execute("SELECT username, password FROM accounts LIMIT 1")
