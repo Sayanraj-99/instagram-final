@@ -1,9 +1,37 @@
-import os
+import sqlite3
+import config
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-ADMIN_IDS = [
-    8129775964
-]
+def get_connection():
+    return sqlite3.connect(config.DATABASE)
 
-DATABASE = "/tmp/bot.db"
+
+def init_db():
+
+    conn = get_connection()
+    c = conn.cursor()
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS queue(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        file_id TEXT,
+        caption TEXT
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS accounts(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS proxies(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        proxy TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
