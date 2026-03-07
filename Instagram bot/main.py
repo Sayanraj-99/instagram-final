@@ -1,14 +1,12 @@
 import database
-from scheduler import Scheduler
-import threading
+from scheduler import AutoScheduler
 
 # Initialize database
 database.init_db()
 
-# Start scheduler in background
-scheduler = Scheduler()
-thread = threading.Thread(target=scheduler.run)
-thread.start()
+# Start scheduler
+scheduler = AutoScheduler()
+scheduler.start()
 
 # Start bot
 from bot import app
