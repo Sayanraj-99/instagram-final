@@ -27,8 +27,8 @@ def init_db():
     
     # Content queue table
  # One more thing (very important)
-Your database must support status.
-Make sure your queue table has:
+# Your database must support status.
+#Make sure your queue table has:
 status TEXT DEFAULT 'pending'
             status TEXT DEFAULT 'pending',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
