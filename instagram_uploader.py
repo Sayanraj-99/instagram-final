@@ -30,7 +30,8 @@ class InstagramUploader:
         return proxies
 
     def _download_file(self, file_id):
-        """Download video from Telegram"""
+        """Download file from Telegram"""
+
         file_path = os.path.join(self.download_dir, f"{file_id}.mp4")
 
         try:
@@ -71,7 +72,7 @@ class InstagramUploader:
             return None
 
     def upload_video(self, username, password, file_id, caption):
-        """Main upload function"""
+        """Upload video to Instagram"""
 
         file_path = self._download_file(file_id)
 
