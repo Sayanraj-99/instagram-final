@@ -1,9 +1,8 @@
 import os
-import time
 import random
 import logging
 from instagrapi import Client
-from instagrapi.exceptions import VideoNotUploaded, LoginRequired, ClientError
+from instagrapi.exceptions import LoginRequired, ClientError
 from telegram import Bot
 from telegram.error import TelegramError
 import database
@@ -20,6 +19,7 @@ class InstagramUploader:
         os.makedirs(self.download_dir, exist_ok=True)
 
     def _load_proxies(self):
+        """Load active proxies from database"""
         conn = database.get_connection()
         c = conn.cursor()
 
@@ -30,17 +30,21 @@ class InstagramUploader:
         return proxies
 
     def _download_file(self, file_id):
-        path = os.path.join(self.download_dir, f"{file_id}.mp4")
+        """Download video from Telegram"""
+        file_path = os.path.join(self.download_dir, f"{file_id}.mp4")
 
         try:
             file = self.bot.get_file(file_id)
-            file.download(custom_path=path)
-            return path
+            file.download(custom_path=file_path)
+            logger.info(f"Downloaded {file_id}")
+            return file_path
+
         except TelegramError as e:
             logger.error(f"Telegram download failed: {e}")
             return None
 
     def _login(self, username, password, proxy=None):
+        """Login to Instagram"""
 
         client = Client()
 
@@ -48,16 +52,26 @@ class InstagramUploader:
             try:
                 client.set_proxy(proxy)
             except Exception:
-                pass
+                logger.warning("Proxy format invalid")
 
         try:
             client.login(username, password)
             return client
+
+        except LoginRequired:
+            logger.error("Login required again")
+            return None
+
+        except ClientError as e:
+            logger.error(f"Instagram client error: {e}")
+            return None
+
         except Exception as e:
-            logger.error(f"Login failed: {e}")
+            logger.error(f"Unexpected login error: {e}")
             return None
 
     def upload_video(self, username, password, file_id, caption):
+        """Main upload function"""
 
         file_path = self._download_file(file_id)
 
@@ -65,6 +79,7 @@ class InstagramUploader:
             return False
 
         proxies = self._load_proxies()
+
         if not proxies:
             proxies = [None]
 
@@ -85,14 +100,19 @@ class InstagramUploader:
                 c = conn.cursor()
 
                 c.execute(
-                    "UPDATE accounts SET posts_count = posts_count + 1, total_views = total_views + ? WHERE username=?",
+                    """
+                    UPDATE accounts
+                    SET posts_count = posts_count + 1,
+                        total_views = total_views + ?
+                    WHERE username = ?
+                    """,
                     (views, username),
                 )
 
                 conn.commit()
                 conn.close()
 
-                logger.info("Upload successful")
+                logger.info(f"Upload successful for {username}")
 
                 if os.path.exists(file_path):
                     os.remove(file_path)
@@ -100,8 +120,9 @@ class InstagramUploader:
                 client.logout()
                 return True
 
-            except VideoNotUploaded:
-                logger.error("Video upload failed")
+            except Exception as e:
+                logger.error(f"Upload failed: {e}")
+                continue
 
         if os.path.exists(file_path):
             os.remove(file_path)
