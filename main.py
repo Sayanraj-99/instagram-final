@@ -20,3 +20,21 @@ if __name__ == "__main__":
     import time
     while True:
         time.sleep(100)
+import database
+from scheduler import AutoScheduler
+from instagram_bot.bot import app
+
+database.init_db()
+
+scheduler = AutoScheduler()
+scheduler.start()
+
+print("Scheduler started")
+
+print("Bot started")
+app.run_polling()
+
+# keep alive loop
+import time
+while True:
+    time.sleep(100)
