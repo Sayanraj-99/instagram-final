@@ -7,10 +7,8 @@ from instagram_uploader import InstagramUploader
 class AutoScheduler:
 
     def __init__(self):
-
         self.uploader = InstagramUploader()
         self.running = False
-
 
     def start(self):
         """Start scheduler thread"""
@@ -26,7 +24,6 @@ class AutoScheduler:
 
         print("Scheduler started")
 
-
     def _run(self):
         """Main scheduling loop"""
 
@@ -35,47 +32,45 @@ class AutoScheduler:
             conn = database.get_connection()
             c = conn.cursor()
 
-            # Get next video
-          c.execute("SELECT id, file_id, caption FROM queue WHERE status='pending' LIMIT 1")
+            # Get next pending video
+            c.execute("SELECT id, file_id, caption FROM queue WHERE status='pending' LIMIT 1")
             video = c.fetchone()
 
-           if video:
-    c.execute(
-        "UPDATE queue SET status='processing' WHERE id=?",
-        (video[0],)
-    )
-    conn.commit()
+            if video:
+
+                video_id, file_id, caption = video
+
+                # Mark as processing
+                c.execute("UPDATE queue SET status='processing' WHERE id=?", (video_id,))
+                conn.commit()
 
                 # Get account
-                c.execute("SELECT username, password FROM accounts LIMIT 1")
+                c.execute("SELECT username, password FROM accounts WHERE status='active' LIMIT 1")
                 account = c.fetchone()
 
                 if account:
+                    username, password = account
 
                     success = self.uploader.upload_video(
-                        account[0],      # username
-                        account[1],      # password
-                        video[1],        # file_id
-                        video[2]         # caption
+                        username,
+                        password,
+                        file_id,
+                        caption
                     )
 
-               if success:
+                    if success:
+                        print("Upload successful")
 
-    print("Upload successful")
-
-    c.execute(
-        "UPDATE queue SET status='uploaded' WHERE id=?",
-        (video[0],)
-    )
-
-    conn.commit()
+                        c.execute(
+                            "UPDATE queue SET status='uploaded', uploaded_at=CURRENT_TIMESTAMP WHERE id=?",
+                            (video_id,)
+                        )
+                        conn.commit()
 
             conn.close()
 
-          time.sleep(30)
-
+            time.sleep(60)
 
     def stop(self):
-
         self.running = False
         print("Scheduler stopped")
