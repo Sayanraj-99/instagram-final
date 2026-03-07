@@ -112,10 +112,13 @@ class InstagramUploader:
         if not file_path:
             return False
         
-        proxies = self._load_proxies()
-        random.shuffle(proxies)  # Randomize proxy order
-        
-        for proxy in proxies:
+       proxies = self._load_proxies()
+
+# allow upload without proxy if none exist
+if not proxies:
+    proxies = [None]
+
+random.shuffle(proxies)
             logger.info(f"Trying proxy: {proxy}")
             client = self._instagram_login(username, password, proxy)
             
