@@ -104,7 +104,8 @@ class InstagramUploader:
         c = conn.cursor()
         c.execute("UPDATE accounts SET status='suspended' WHERE username=?", (username,))
         conn.commit()
-        conn.close()
+        with database.get_connection() as conn:
+    c = conn.cursor()
     
     def upload_video(self, username, password, file_id, caption):
         """Main upload method with proxy retry mechanism"""
