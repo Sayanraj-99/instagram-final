@@ -36,15 +36,15 @@ class AutoScheduler:
             c = conn.cursor()
 
             # Get next video
-            c.execute("SELECT id, file_id, caption FROM queue LIMIT 1")
+          c.execute("SELECT id, file_id, caption FROM queue WHERE status='pending' LIMIT 1")
             video = c.fetchone()
 
-            if video:
-                c.execute(
-    "UPDATE queue SET status='processing' WHERE id=?",
-    (video[0],)
-)
-conn.commit()
+           if video:
+    c.execute(
+        "UPDATE queue SET status='processing' WHERE id=?",
+        (video[0],)
+    )
+    conn.commit()
 
                 # Get account
                 c.execute("SELECT username, password FROM accounts LIMIT 1")
@@ -59,21 +59,20 @@ conn.commit()
                         video[2]         # caption
                     )
 
-                    if success:
+               if success:
 
-                        print("Upload successful")
+    print("Upload successful")
 
-                       c.execute(
-    "UPDATE queue SET status='uploaded' WHERE id=?",
-    (video[0],)
-)
-                        )
+    c.execute(
+        "UPDATE queue SET status='uploaded' WHERE id=?",
+        (video[0],)
+    )
 
-                        conn.commit()
+    conn.commit()
 
             conn.close()
 
-            time.sleep(60)
+          time.sleep(30)
 
 
     def stop(self):
