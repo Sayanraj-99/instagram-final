@@ -1,8 +1,9 @@
 import database
 from scheduler import AutoScheduler
 from instagram_bot.bot import app
+
 if __name__ == "__main__":
-    
+
     # Initialize database
     database.init_db()
 
@@ -15,6 +16,7 @@ if __name__ == "__main__":
     # Start bot
     print("Bot started")
     app.run_polling()
+
     import time
-while True:
-    time.sleep(100)
+    while True:
+        time.sleep(100)
