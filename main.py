@@ -1,6 +1,5 @@
 import database
-from scheduler import AutoScheduler
-from bot import app
+from instagram_bot.bot import app
 
 if __name__ == "__main__":
     
