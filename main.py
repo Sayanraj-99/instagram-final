@@ -16,3 +16,6 @@ if __name__ == "__main__":
     # Start bot
     print("Bot started")
     app.run_polling()
+    import time
+while True:
+    time.sleep(100)
