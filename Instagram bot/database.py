@@ -26,11 +26,10 @@ def init_db():
     """)
     
     # Content queue table
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS queue(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            file_id TEXT NOT NULL,
-            caption TEXT,
+  One more thing (very important)
+Your database must support status.
+Make sure your queue table has:
+status TEXT DEFAULT 'pending'
             status TEXT DEFAULT 'pending',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             uploaded_at TIMESTAMP,
