@@ -1,2 +1,9 @@
-BOT_TOKEN = "YOUR_BOT_TOKEN"
-DATABASE = "instagram.db"
+import os
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+ADMIN_IDS = [
+    8129775964
+]
+
+DATABASE = "/tmp/bot.db"
