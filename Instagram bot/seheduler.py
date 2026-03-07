@@ -58,9 +58,10 @@ class AutoScheduler:
 
                         print("Upload successful")
 
-                        c.execute(
-                            "DELETE FROM queue WHERE id=?",
-                            (video[0],)
+                       c.execute(
+    "UPDATE queue SET status='uploaded' WHERE id=?",
+    (video[0],)
+)
                         )
 
                         conn.commit()
