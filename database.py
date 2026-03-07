@@ -49,6 +49,3 @@ status TEXT DEFAULT 'pending'
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    
-    conn.commit()
-    conn.close()
