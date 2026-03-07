@@ -104,11 +104,10 @@ class InstagramUploader:
         c = conn.cursor()
         c.execute("UPDATE accounts SET status='suspended' WHERE username=?", (username,))
         conn.commit()
-        with database.get_connection() as conn:
-    c = conn.cursor()
-    
+        
     def upload_video(self, username, password, file_id, caption):
         """Main upload method with proxy retry mechanism"""
+        if caption is None: caption = ""
         file_path = self._download_telegram_file(file_id)
         if not file_path:
             return False
@@ -120,6 +119,7 @@ if not proxies:
     proxies = [None]
 
 random.shuffle(proxies)
+for proxy in proxies[:5]:
             logger.info(f"Trying proxy: {proxy}")
             client = self._instagram_login(username, password, proxy)
             
@@ -145,6 +145,7 @@ random.shuffle(proxies)
             except VideoNotUploaded:
                 logger.error(f"Upload failed for {username} with proxy {proxy}")
                 self._mark_proxy_banned(proxy)
+                time.sleep(2)
                 continue  # Try next proxy
                 
             except (ClientError, LoginRequired) as e:
