@@ -3,44 +3,74 @@ import threading
 import database
 from instagram_uploader import InstagramUploader
 
+
 class AutoScheduler:
+
     def __init__(self):
+
         self.uploader = InstagramUploader()
         self.running = False
-    
+
+
     def start(self):
-        """Start automatic scheduler"""
+        """Start scheduler thread"""
+
+        if self.running:
+            return
+
         self.running = True
+
         thread = threading.Thread(target=self._run)
+        thread.daemon = True
         thread.start()
-    
+
+        print("Scheduler started")
+
+
     def _run(self):
         """Main scheduling loop"""
+
         while self.running:
+
             conn = database.get_connection()
             c = conn.cursor()
-            
-            # Get next video from queue
-            c.execute("SELECT * FROM queue WHERE status='pending' LIMIT 1")
+
+            # Get next video
+            c.execute("SELECT id, file_id, caption FROM queue LIMIT 1")
             video = c.fetchone()
-            
+
             if video:
-                # Get first available account
-                c.execute("SELECT * FROM accounts WHERE status='active' LIMIT 1")
+
+                # Get account
+                c.execute("SELECT username, password FROM accounts LIMIT 1")
                 account = c.fetchone()
-                
+
                 if account:
+
                     success = self.uploader.upload_video(
-                        account[1], account[2], video[1], video[2]
+                        account[0],      # username
+                        account[1],      # password
+                        video[1],        # file_id
+                        video[2]         # caption
                     )
-                    
+
                     if success:
-                        c.execute("DELETE FROM queue WHERE id=?", (video[0],))
+
+                        print("Upload successful")
+
+                        c.execute(
+                            "DELETE FROM queue WHERE id=?",
+                            (video[0],)
+                        )
+
                         conn.commit()
-            
+
             conn.close()
-            time.sleep(60)  # Check every minute
-    
+
+            time.sleep(60)
+
+
     def stop(self):
-        """Stop scheduler"""
+
         self.running = False
+        print("Scheduler stopped")
